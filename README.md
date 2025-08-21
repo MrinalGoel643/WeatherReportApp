@@ -11,3 +11,6 @@ Bootcamp Week 5 Day 1
 `pip install -r requirements.txt`
 ### Run code
 `python3 main.py`
+
+## Python version used
+`Python 3.9.6`
