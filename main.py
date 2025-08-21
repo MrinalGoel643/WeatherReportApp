@@ -1,43 +1,27 @@
-import requests
-import os
-from dotenv import load_dotenv
+import streamlit as st
+from helper import get_weather
 
-# Load your API key from .env file
-load_dotenv()
-API_KEY = os.getenv("OPENWEATHER_API_KEY")
+# App title and description
+st.title("🌤️ Weather App")
+st.subheader("Get real-time weather for any city")
 
-def get_weather(city):
-    """
-    Fetch weather for the given city and print it nicely.
-    """
-    # 1. Create the API endpoint URL
-    url = "https://api.openweathermap.org/data/2.5/weather"
-    
-    # 2. Set query parameters
-    params = {
-        "q": city,
-        "appid": API_KEY,
-        "units": "metric"  # temperature in Celsius
-    }
-    
-    # 3. Make the request
-    response = requests.get(url, params=params)
-    
-    # 4. Parse JSON
-    data = response.json()
+# Input section
+city = st.text_input("Enter a city name:", key="input")
 
-    #print(data)
-    
-    # 5. Extract key info
-    city_name = data["name"]
-    temp = data["main"]["temp"]
-    humidity = data["main"]["humidity"]
-    description = data["weather"][0]["description"]
-    
-    # 6. Print
-    print(f"In {city_name}, it is {temp}°C with humidity {humidity} and {description}.")
-
-if __name__ == "__main__":
-    city = input("Please enter the city for which you would like to fetch the weather : ")
-    get_weather(city)
-
+# Fetch weather on button click
+if st.button("Get Weather"):
+    if city.strip():
+        try:
+            weather = get_weather(city)
+            if isinstance(weather, dict):  # assuming dict response
+                st.success(f"Weather in {city.title()}:")
+                st.metric("🌡 Temperature", f"{weather.get('temp', 'N/A')} °C")
+                st.write(f"**Condition:** {weather.get('description', 'N/A')}")
+                st.write(f"**Humidity:** {weather.get('humidity', 'N/A')}%")
+                st.write(f"**Wind Speed:** {weather.get('wind', 'N/A')} km/h")
+            else:  # fallback if get_weather returns text
+                st.info(weather)
+        except Exception as e:
+            st.error(f"Could not fetch weather: {e}")
+    else:
+        st.warning("Please enter a city name.")
